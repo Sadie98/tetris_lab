@@ -1,6 +1,27 @@
 import pygame
 from pygame.locals import *
 import random
+from ResManager import *
+
+
+if __name__ == '__main__':
+    # Инициализируем pygame.
+    pygame.init()
+
+    # Устанавливаем разрешение экрана.
+    pygame.display.set_mode((640,480))
+
+    # Создаем менеджер ресурсов, мы используем значения по умолчанию
+    # для функции __init__, так как они нас устраивают.
+    manager = ResManager()
+
+    # Устанавливаем иконку.
+    pygame.display.set_icon(manager.get_image('icon.png'))
+    # Устанавливаем заголовок.
+    pygame.display.set_caption("Plambir")
+
+    # А это что бы окно не закрылось сразу.
+    time.sleep(10)
 
 
 class TetrisGame:
@@ -68,7 +89,6 @@ class TetrisGame:
             pygame.display.update()
         pygame.quit()
 
-
 def new_figure():
     figure = [[], [], [], []]
     num_of_figure = random.randint(1, 5)
@@ -120,7 +140,6 @@ def new_figure():
         figure[3].append(3)
 
     return figure, num_of_figure
-
 
 class CellList:
     def __init__(self, rows, cols, cell_size):
@@ -183,6 +202,7 @@ class CellList:
             self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
             self.moving_figure[3][0] += 1
             self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.end_came = not self.game_over()
             return True
 
         else:
@@ -190,7 +210,9 @@ class CellList:
             self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
             self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
             self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.end_came = not self.game_over()
             return False
+
             self.moving_figure, self.type_of_figure = new_figure()
 
     def update_list(self):
@@ -205,6 +227,7 @@ class CellList:
             self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
             self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
             self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.end_came = not self.game_over()
             self.moving_figure, self.type_of_figure = new_figure()
 
     def rotate(self):
@@ -229,7 +252,7 @@ class CellList:
                 self.moving_figure[3][1] += 1
 
 
-        elif  self.type_of_figure == 2:
+        elif self.type_of_figure == 2:
             if self.moving_figure[0][0] == self.moving_figure[2][0]:
                 self.moving_figure[0][0] += 1
                 self.moving_figure[0][1] += 1
@@ -248,16 +271,16 @@ class CellList:
                 self.moving_figure[3][1] += 1
 
 
-        elif  self.type_of_figure == 3:
+        elif self.type_of_figure == 3:
             pass
 
 
-        elif  self.type_of_figure == 4:
-            if  self.moving_figure[3][1] ==  self.moving_figure[2][1]:
+        elif self.type_of_figure == 4:
+            if self.moving_figure[3][1] == self.moving_figure[2][1]:
                 self.moving_figure[3][0] += 2
                 self.moving_figure[3][1] += 2
                 self.moving_figure[2][0] += 2
-            elif self.moving_figure[0][0] ==  self.moving_figure[2][0] - 1:
+            elif self.moving_figure[0][0] == self.moving_figure[2][0] - 1:
                 self.moving_figure[3][1] -= 3
                 self.moving_figure[0][0] += 2
                 self.moving_figure[0][1] -= 1
@@ -265,7 +288,7 @@ class CellList:
                 self.moving_figure[2][0] -= 2
                 self.moving_figure[0][0] -= 2
                 self.moving_figure[0][1] -= 2
-            elif self.moving_figure[2][0] <  self.moving_figure[3][0]:
+            elif self.moving_figure[2][0] < self.moving_figure[3][0]:
                 self.moving_figure[0][1] += 3
                 self.moving_figure[3][0] -= 2
                 self.moving_figure[3][1] += 1
@@ -378,8 +401,7 @@ class CellList:
     def move_down(self):
         while self.move_figure():
             self.move_figure()
-            if self.game_over():
-                self.end_came = True
+        self.end_came = not self.game_over()
         self.moving_figure, self.type_of_figure = new_figure()
 
     def delete_row(self):
