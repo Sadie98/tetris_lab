@@ -2,26 +2,27 @@ import pygame
 from pygame.locals import *
 import random
 from ResManager import *
+from pygame import mixer
 
 
-if __name__ == '__main__':
-    # Инициализируем pygame.
-    pygame.init()
+#if __name__ == '__main__':
+#    # Инициализируем pygame.
+#    pygame.init()
 
     # Устанавливаем разрешение экрана.
-    pygame.display.set_mode((640,480))
+#    pygame.display.set_mode((640,480))
 
     # Создаем менеджер ресурсов, мы используем значения по умолчанию
     # для функции __init__, так как они нас устраивают.
-    manager = ResManager()
+ #   manager = ResManager()
 
     # Устанавливаем иконку.
-    pygame.display.set_icon(manager.get_image('icon.png'))
+  #  pygame.display.set_icon(manager.get_image('icon.png'))
     # Устанавливаем заголовок.
-    pygame.display.set_caption("Plambir")
+   # pygame.display.set_caption("Plambir")
 
     # А это что бы окно не закрылось сразу.
-    time.sleep(10)
+    #time.sleep(10)
 
 
 class TetrisGame:
@@ -29,9 +30,12 @@ class TetrisGame:
         self.width = width
         self.height = height
         self.cell_size = cell_size
-
+        self.on_pause = False
         self.screen_size = width, height
         self.screen = pygame.display.set_mode(self.screen_size)
+        mixer.init()
+        self.sound_onpause = pygame.mixer.Sound('onpause.wav')
+        #self.screen.set_icon()
 
 
         self.cell_width = self.width // self.cell_size
@@ -60,33 +64,47 @@ class TetrisGame:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == eval("pygame.K_DOWN") or event.key == eval("pygame.K_UP"):
+                        if not self.on_pause:
+                            this_cell_list.rotate()
+                            this_cell_list.draw()
+                            self.draw_grid()
+                    if event.key == eval("pygame.K_p"):
+                        if self.on_pause == True:
+                            self.sound_onpause.stop()
+                            this_cell_list.sound_game.play()
+                            self.on_pause = False
+                        else:
+                            this_cell_list.sound_game.stop()
+                            self.sound_onpause.play()
+                            self.on_pause = True
+                    if event.key == eval("pygame.K_RIGHT"):
+                        if not self.on_pause:
+                            this_cell_list.move_right()
+                            this_cell_list.draw()
+                            self.draw_grid()
+                    if event.key == eval("pygame.K_LEFT"):
+                        if not self.on_pause:
+                            this_cell_list.move_left()
+                            this_cell_list.draw()
+                            self.draw_grid()
+                    if event.key == eval("pygame.K_SPACE"):
+                        if not self.on_pause:
+                            this_cell_list.move_down()
+                            this_cell_list.draw()
+                            self.draw_grid()
+            if not self.on_pause:
+                self.speed += this_cell_list.delta_speed
+                this_cell_list.delete_row()
+                this_cell_list.draw()
+                self.draw_grid()
+                this_cell_list.update_list()
                 if this_cell_list.end_came == True:
                     running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == eval("pygame.K_DOWN"):
-                        this_cell_list.rotate()
-                        this_cell_list.draw()
-                        self.draw_grid()
-                    if event.key == eval("pygame.K_RIGHT"):
-                        this_cell_list.move_right()
-                        this_cell_list.draw()
-                        self.draw_grid()
-                    if event.key == eval("pygame.K_LEFT"):
-                        this_cell_list.move_left()
-                        this_cell_list.draw()
-                        self.draw_grid()
-                    if event.key == eval("pygame.K_SPACE"):
-                        this_cell_list.move_down()
-                        this_cell_list.draw()
-                        self.draw_grid()
-            self.speed += this_cell_list.delta_speed
-            this_cell_list.delete_row()
-            this_cell_list.draw()
-            self.draw_grid()
-            this_cell_list.update_list()
-            pygame.display.flip()
-            clock.tick(self.speed)
-            pygame.display.update()
+                pygame.display.flip()
+                clock.tick(self.speed)
+                pygame.display.update()
         pygame.quit()
 
 def new_figure():
@@ -150,6 +168,12 @@ class CellList:
         self.points = 0
         self.delta_speed = 0
         self.end_came = False
+
+        #mixer.init()
+        self.sound_game = pygame.mixer.Sound('tik.wav')
+        self.sound_delete = pygame.mixer.Sound('fullrow.wav')
+        self.sound_game_over = pygame.mixer.Sound('gameover.wav')
+        self.sound_game.play()
         self.moving_figure, self.type_of_figure = new_figure()
         for i in range(rows):
             self.result.append([])
@@ -202,7 +226,7 @@ class CellList:
             self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
             self.moving_figure[3][0] += 1
             self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
-            self.end_came = not self.game_over()
+            #self.end_came = not self.game_over()
             return True
 
         else:
@@ -213,9 +237,10 @@ class CellList:
             self.end_came = not self.game_over()
             return False
 
-            self.moving_figure, self.type_of_figure = new_figure()
 
     def update_list(self):
+        self.sound_game.stop()
+        self.sound_game.play()
         self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 0
         self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 0
         self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 0
@@ -228,7 +253,8 @@ class CellList:
             self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
             self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
             self.end_came = not self.game_over()
-            self.moving_figure, self.type_of_figure = new_figure()
+            if not self.end_came:
+                self.moving_figure, self.type_of_figure = new_figure()
 
     def rotate(self):
         self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 0
@@ -237,38 +263,48 @@ class CellList:
         self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 0
         if self.type_of_figure == 1:
             if self.moving_figure[0][0] == self.moving_figure[1][0]:
-                self.moving_figure[0][0] -= 2
-                self.moving_figure[0][1] += 2
-                self.moving_figure[1][0] -= 1
-                self.moving_figure[1][1] += 1
-                self.moving_figure[3][0] += 1
-                self.moving_figure[3][1] -= 1
-            else:
-                self.moving_figure[0][0] += 2
-                self.moving_figure[0][1] -= 2
-                self.moving_figure[1][0] += 1
-                self.moving_figure[1][1] -= 1
-                self.moving_figure[3][0] -= 1
-                self.moving_figure[3][1] += 1
+                if  self.result[self.moving_figure[0][0] - 2][self.moving_figure[0][1] + 2] == 0 and \
+                    self.result[self.moving_figure[1][0] - 1][self.moving_figure[1][1] + 1] == 0 and \
+                    self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1] - 1] == 0:
+                    self.moving_figure[0][0] -= 2
+                    self.moving_figure[0][1] += 2
+                    self.moving_figure[1][0] -= 1
+                    self.moving_figure[1][1] += 1
+                    self.moving_figure[3][0] += 1
+                    self.moving_figure[3][1] -= 1
+            elif self.result[self.moving_figure[0][0] + 2][self.moving_figure[0][1] - 2] == 0:
+                if  self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1] - 1] == 0 and \
+                    self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] + 1] == 0:
+                    self.moving_figure[0][0] += 2
+                    self.moving_figure[0][1] -= 2
+                    self.moving_figure[1][0] += 1
+                    self.moving_figure[1][1] -= 1
+                    self.moving_figure[3][0] -= 1
+                    self.moving_figure[3][1] += 1
 
 
         elif self.type_of_figure == 2:
             if self.moving_figure[0][0] == self.moving_figure[2][0]:
-                self.moving_figure[0][0] += 1
-                self.moving_figure[0][1] += 1
+                if self.result[self.moving_figure[0][0] + 1][self.moving_figure[0][1] + 1] == 0:
+                    self.moving_figure[0][0] += 1
+                    self.moving_figure[0][1] += 1
             elif self.moving_figure[3][1] == self.moving_figure[0][1]:
-                self.moving_figure[3][0] += 1
-                self.moving_figure[3][1] -= 1
+                if self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1] - 1] == 0:
+                    self.moving_figure[3][0] += 1
+                    self.moving_figure[3][1] -= 1
             elif self.moving_figure[3][0] == self.moving_figure[2][0]:
-                self.moving_figure[2][0] -= 1
-                self.moving_figure[2][1] -= 1
-            else:
-                self.moving_figure[0][0] -= 1
-                self.moving_figure[0][1] -= 1
-                self.moving_figure[2][0] += 1
-                self.moving_figure[2][1] += 1
-                self.moving_figure[3][0] -= 1
-                self.moving_figure[3][1] += 1
+                if self.result[self.moving_figure[2][0] - 1][self.moving_figure[2][1] - 1] == 0:
+                    self.moving_figure[2][0] -= 1
+                    self.moving_figure[2][1] -= 1
+            elif  self.result[self.moving_figure[0][0] - 1][self.moving_figure[0][1] - 1] == 0:
+                if self.result[self.moving_figure[2][0] + 1][self.moving_figure[2][1] + 1] == 0  and \
+                    self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] + 1] == 0:
+                    self.moving_figure[0][0] -= 1
+                    self.moving_figure[0][1] -= 1
+                    self.moving_figure[2][0] += 1
+                    self.moving_figure[2][1] += 1
+                    self.moving_figure[3][0] -= 1
+                    self.moving_figure[3][1] += 1
 
 
         elif self.type_of_figure == 3:
@@ -277,35 +313,48 @@ class CellList:
 
         elif self.type_of_figure == 4:
             if self.moving_figure[3][1] == self.moving_figure[2][1]:
-                self.moving_figure[3][0] += 2
-                self.moving_figure[3][1] += 2
-                self.moving_figure[2][0] += 2
+                if self.result[self.moving_figure[3][0] + 2][self.moving_figure[3][1] + 2] == 0  and \
+                    self.result[self.moving_figure[2][0] + 2][self.moving_figure[2][1]] == 0:
+                    self.moving_figure[3][0] += 2
+                    self.moving_figure[3][1] += 2
+                    self.moving_figure[2][0] += 2
             elif self.moving_figure[0][0] == self.moving_figure[2][0] - 1:
-                self.moving_figure[3][1] -= 3
-                self.moving_figure[0][0] += 2
-                self.moving_figure[0][1] -= 1
+                if self.result[self.moving_figure[3][0]][self.moving_figure[3][1] - 3] == 0  and \
+                    self.result[self.moving_figure[0][0] + 2][self.moving_figure[0][1] - 1] == 0:
+                    self.moving_figure[3][1] -= 3
+                    self.moving_figure[0][0] += 2
+                    self.moving_figure[0][1] -= 1
             elif self.moving_figure[2][1] == self.moving_figure[0][1]:
-                self.moving_figure[2][0] -= 2
-                self.moving_figure[0][0] -= 2
-                self.moving_figure[0][1] -= 2
+                if self.result[self.moving_figure[2][0] - 2][self.moving_figure[2][1]] == 0  and \
+                    self.result[self.moving_figure[0][0] - 2][self.moving_figure[0][1] - 2] == 0:
+                    self.moving_figure[2][0] -= 2
+                    self.moving_figure[0][0] -= 2
+                    self.moving_figure[0][1] -= 2
             elif self.moving_figure[2][0] < self.moving_figure[3][0]:
-                self.moving_figure[0][1] += 3
-                self.moving_figure[3][0] -= 2
-                self.moving_figure[3][1] += 1
+                if self.result[self.moving_figure[0][0]][self.moving_figure[0][1] + 3] == 0  and \
+                    self.result[self.moving_figure[3][0] - 2][self.moving_figure[3][1] + 1] == 0:
+                    self.moving_figure[0][1] += 3
+                    self.moving_figure[3][0] -= 2
+                    self.moving_figure[3][1] += 1
 
         elif  self.type_of_figure == 5:
             if self.moving_figure[0][1] == self.moving_figure[1][1]:
-                self.moving_figure[0][1] -= 2
-                self.moving_figure[1][0] += 1
-                self.moving_figure[1][1] -= 1
-                self.moving_figure[3][0] += 1
-                self.moving_figure[3][1] += 1
-            else:
-                self.moving_figure[0][1] += 2
-                self.moving_figure[1][0] -= 1
-                self.moving_figure[1][1] += 1
-                self.moving_figure[3][0] -= 1
-                self.moving_figure[3][1] -= 1
+                if self.result[self.moving_figure[0][0]][self.moving_figure[0][1] - 2] == 0  and \
+                    self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1] - 1] == 0 and \
+                    self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1] + 1] == 0:
+                    self.moving_figure[0][1] -= 2
+                    self.moving_figure[1][0] += 1
+                    self.moving_figure[1][1] -= 1
+                    self.moving_figure[3][0] += 1
+                    self.moving_figure[3][1] += 1
+            elif self.result[self.moving_figure[0][0]][self.moving_figure[0][1] + 2] == 0:
+                if self.result[self.moving_figure[1][0] - 1][self.moving_figure[1][1] + 1] == 0 and \
+                    self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] - 1] == 0:
+                    self.moving_figure[0][1] += 2
+                    self.moving_figure[1][0] -= 1
+                    self.moving_figure[1][1] += 1
+                    self.moving_figure[3][0] -= 1
+                    self.moving_figure[3][1] -= 1
 
         self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
         self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
@@ -412,6 +461,9 @@ class CellList:
                 if self.result[i][j] == 0:
                     is_full = False
             if is_full:
+                self.sound_game.stop()
+                self.sound_delete.play()
+
                 self.points += 1
                 self.delta_speed += 0.5
                 row = i
@@ -426,6 +478,10 @@ class CellList:
         for i in range(self.cols):
             if self.result[0][i] == 1:
                 clear = False
+        if not clear:
+            self.sound_game.stop()
+            self.sound_game_over.play()
+            time.sleep(4)
         return clear
 
 
