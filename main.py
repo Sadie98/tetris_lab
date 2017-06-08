@@ -1,28 +1,97 @@
 import pygame
+import pygbutton
 from pygame.locals import *
 import random
-from ResManager import *
 from pygame import mixer
+import os, time
+from tkinter import *
+
+class EndOfGame:
+    def __init__(self, points):
+        pygame.display.set_icon(pygame.image.load("icon.png"))
+        pygame.display.set_caption("Tetris")
+        self.width = 500
+        self.height = 500
+        self.points = points
+        self.on_pause = False
+        self.screen_size = self.width, self.height
+        self.screen = pygame.display.set_mode(self.screen_size)
 
 
-#if __name__ == '__main__':
-#    # Инициализируем pygame.
-#    pygame.init()
+    def run(self):
+        pygame.init()
+        white = (255, 255, 255)
+        clock = pygame.time.Clock()
+        #button = Button(color=white, height=15, x=30, y=30, length=40, width=15, text="NEW GAME", text_color="BLACK")
+        button = Button(text="Hello")
+        button.pack()
 
-    # Устанавливаем разрешение экрана.
-#    pygame.display.set_mode((640,480))
+        self.screen.fill(white)
+        font = pygame.font.Font(None, 25)
+        black = (0, 0, 0)
+        text = font.render("Game over", True, black)
+        self.screen.blit(text, [50, 20])
+        text = font.render("Your result: " + str(self.points), True, black)
+        self.screen.blit(text, [40, 40])
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    running = False
+                #elif 'click' in button.handleEvent(event):
+                 #   print("Button pressed.")
 
-    # Создаем менеджер ресурсов, мы используем значения по умолчанию
-    # для функции __init__, так как они нас устраивают.
- #   manager = ResManager()
+            pygame.display.update()
 
-    # Устанавливаем иконку.
-  #  pygame.display.set_icon(manager.get_image('icon.png'))
-    # Устанавливаем заголовок.
-   # pygame.display.set_caption("Plambir")
+        pygame.quit()
 
-    # А это что бы окно не закрылось сразу.
-    #time.sleep(10)
+
+
+#class Button:
+    # def __init__(self, surface, color, x, y, length, height, width, text, text_color):
+    #     surface = self.draw_button(surface, color, length, height, x, y, width)
+    #     surface = self.write_text(surface, text, text_color, length, height, x, y)
+    #     self.rect = pygame.Rect(x, y, length, height)
+    #     return surface
+    #
+    # def write_text(self, surface, text, text_color, length, height, x, y):
+    #     font_size = int(length // len(text))
+    #     myFont = pygame.font.SysFont("Calibri", font_size)
+    #     myText = myFont.render(text, 1, text_color)
+    #     surface.blit(myText,
+    #                     ((x + length / 2) - myText.get_width() / 2, (y + height / 2) - myText.get_height() / 2))
+    #     return surface
+    #
+    # def draw_button(self, surface, color, length, height, x, y, width):
+    #     for i in range(1, 10):
+    #         s = pygame.Surface((length + (i * 2), height + (i * 2)))
+    #         s.fill(color)
+    #         alpha = (255 / (i + 2))
+    #         if alpha <= 0:
+    #             alpha = 1
+    #         s.set_alpha(alpha)
+    #         pygame.draw.rect(s, color, (x - i, y - i, length + i, height + i), width)
+    #         surface.blit(s, (x - i, y - i))
+    #     pygame.draw.rect(surface, color, (x, y, length, height), 0)
+    #     pygame.draw.rect(surface, (190, 190, 190), (x, y, length, height), 1)
+    #     return surface
+    #
+    # def pressed(self, mouse):
+    #     if mouse[0] > self.rect.topleft[0]:
+    #         if mouse[1] > self.rect.topleft[1]:
+    #             if mouse[0] < self.rect.bottomright[0]:
+    #                 if mouse[1] < self.rect.bottomright[1]:
+    #                     print
+    #                     "Some button was pressed!"
+    #                     return True
+    #                 else:
+    #                     return False
+    #             else:
+    #                 return False
+    #         else:
+    #             return False
+    #     else:
+    #         return False
 
 
 class TetrisGame:
@@ -32,6 +101,8 @@ class TetrisGame:
         self.cell_size = cell_size
         self.on_pause = False
         self.screen_size = width, height
+        pygame.display.set_icon(pygame.image.load("icon.png"))
+        pygame.display.set_caption("Tetris")
         self.screen = pygame.display.set_mode(self.screen_size)
         mixer.init()
         self.sound_onpause = pygame.mixer.Sound('onpause.wav')
@@ -106,6 +177,9 @@ class TetrisGame:
                 clock.tick(self.speed)
                 pygame.display.update()
         pygame.quit()
+
+        return this_cell_list.points
+
 
 def new_figure():
     figure = [[], [], [], []]
@@ -488,4 +562,6 @@ class CellList:
 
 if __name__ == '__main__':
     game = TetrisGame(width=240, height=480, cell_size=20)
-    game.run()
+    points = game.run()
+    EndOfGame = EndOfGame(12)
+    EndOfGame.run()
