@@ -158,7 +158,7 @@ class TetrisGame:
 def new_figure():
     figure = [[], [], [], []]
     num_of_figure = random.randint(1, 5)
-    #num_of_figure = 4
+
     if num_of_figure == 1:
         figure[0].append(0)
         figure[0].append(1)
@@ -168,6 +168,7 @@ def new_figure():
         figure[2].append(3)
         figure[3].append(0)
         figure[3].append(4)
+        color = (148, 0, 211)
     elif num_of_figure == 2:
         figure[0].append(1)
         figure[0].append(2)
@@ -177,6 +178,7 @@ def new_figure():
         figure[2].append(4)
         figure[3].append(0)
         figure[3].append(3)
+        color = (208, 32, 144)
     elif num_of_figure == 3:
         figure[0].append(1)
         figure[0].append(3)
@@ -186,6 +188,7 @@ def new_figure():
         figure[2].append(3)
         figure[3].append(0)
         figure[3].append(4)
+        color = (255, 20, 147)
     elif num_of_figure == 4:
         figure[0].append(2)
         figure[0].append(4)
@@ -195,6 +198,7 @@ def new_figure():
         figure[2].append(3)
         figure[3].append(0)
         figure[3].append(3)
+        color = (219, 112, 147)
     elif num_of_figure == 5:
         figure[0].append(2)
         figure[0].append(4)
@@ -204,8 +208,9 @@ def new_figure():
         figure[2].append(3)
         figure[3].append(0)
         figure[3].append(3)
+        color = (221, 160, 221)
 
-    return figure, num_of_figure
+    return figure, num_of_figure, color
 
 
 class CellList:
@@ -223,7 +228,7 @@ class CellList:
         self.sound_delete = pygame.mixer.Sound('fullrow.wav')
         self.sound_game_over = pygame.mixer.Sound('gameover.wav')
         self.sound_game.play()
-        self.moving_figure, self.type_of_figure = new_figure()
+        self.moving_figure, self.type_of_figure, self.color = new_figure()
         for i in range(rows):
             self.result.append([])
             for j in range(cols):
@@ -254,8 +259,19 @@ class CellList:
     def draw(self):
         for i in range(self.rows):
             for j in range(self.cols):
-                if self.result[i][j] == 1:
-                    pygame.draw.rect(game.screen, pygame.Color('green'),
+                color = (148, 0, 211)
+                if self.result[i][j] != 0:
+                    if self.result[i][j] == 1:
+                        color = (148, 0, 211)
+                    elif self.result[i][j] == 2:
+                        color = (208, 32, 144)
+                    elif self.result[i][j] == 3:
+                        color = (255, 20, 147)
+                    elif self.result[i][j] == 4:
+                        color = (219, 112, 147)
+                    elif self.result[i][j] == 5:
+                        color = (221, 160, 221)
+                    pygame.draw.rect(game.screen, color,
                                      (j * self.cell_size, i * self.cell_size, self.cell_size, self.cell_size))
                 if self.result[i][j] == 0:
                     pygame.draw.rect(game.screen, pygame.Color('white'),
@@ -268,21 +284,21 @@ class CellList:
         self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 0
         if not self.on_bottom():
             self.moving_figure[0][0] += 1
-            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
+            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
             self.moving_figure[1][0] += 1
-            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
+            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
             self.moving_figure[2][0] += 1
-            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
+            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
             self.moving_figure[3][0] += 1
-            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             #self.end_came = not self.game_over()
             return True
 
         else:
-            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             self.end_came = not self.game_over()
             return False
 
@@ -296,13 +312,13 @@ class CellList:
         if not self.on_bottom():
             self.move_figure()
         else:
-            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             self.end_came = not self.game_over()
             if not self.end_came:
-                self.moving_figure, self.type_of_figure = new_figure()
+                self.moving_figure, self.type_of_figure, self.color = new_figure()
 
     def rotate(self):
         self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 0
@@ -311,9 +327,14 @@ class CellList:
         self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 0
         if self.type_of_figure == 1:
             if self.moving_figure[0][0] == self.moving_figure[1][0]:
-                if  self.result[self.moving_figure[0][0] - 2][self.moving_figure[0][1] + 2] == 0 and \
+                if  self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] + 1 < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] - 1 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] + 2 < self.cols and \
+                    self.result[self.moving_figure[0][0] - 2][self.moving_figure[0][1] + 2] == 0 and \
                     self.result[self.moving_figure[1][0] - 1][self.moving_figure[1][1] + 1] == 0 and \
                     self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1] - 1] == 0:
+
                     self.moving_figure[0][0] -= 2
                     self.moving_figure[0][1] += 2
                     self.moving_figure[1][0] -= 1
@@ -321,8 +342,12 @@ class CellList:
                     self.moving_figure[3][0] += 1
                     self.moving_figure[3][1] -= 1
             elif self.result[self.moving_figure[0][0] + 2][self.moving_figure[0][1] - 2] == 0:
-                if  self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1] - 1] == 0 and \
-                    self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] + 1] == 0:
+                if  self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] - 1  < self.cols and \
+                            self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                            self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] + 1 < self.cols and \
+                            self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                            self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1] - 1] == 0 and \
+                            self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] + 1] == 0:
                     self.moving_figure[0][0] += 2
                     self.moving_figure[0][1] -= 2
                     self.moving_figure[1][0] += 1
@@ -333,20 +358,39 @@ class CellList:
 
         elif self.type_of_figure == 2:
             if self.moving_figure[0][0] == self.moving_figure[2][0]:
-                if self.result[self.moving_figure[0][0] + 1][self.moving_figure[0][1] + 1] == 0:
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] + 1 < self.cols and \
+                    self.result[self.moving_figure[0][0] + 1][self.moving_figure[0][1] + 1] == 0:
+
                     self.moving_figure[0][0] += 1
                     self.moving_figure[0][1] += 1
             elif self.moving_figure[3][1] == self.moving_figure[0][1]:
-                if self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1] - 1] == 0:
+                if  self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] - 1 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                                                self.result[self.moving_figure[3][0] + 1][
+                                                            self.moving_figure[3][1] - 1] == 0:
                     self.moving_figure[3][0] += 1
                     self.moving_figure[3][1] -= 1
             elif self.moving_figure[3][0] == self.moving_figure[2][0]:
-                if self.result[self.moving_figure[2][0] - 1][self.moving_figure[2][1] - 1] == 0:
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] - 1 < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                    self.result[self.moving_figure[2][0] - 1][self.moving_figure[2][1] - 1] == 0:
                     self.moving_figure[2][0] -= 1
                     self.moving_figure[2][1] -= 1
             elif  self.result[self.moving_figure[0][0] - 1][self.moving_figure[0][1] - 1] == 0:
-                if self.result[self.moving_figure[2][0] + 1][self.moving_figure[2][1] + 1] == 0  and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] + 1 < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] + 1 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                    self.result[self.moving_figure[2][0] + 1][self.moving_figure[2][1] + 1] == 0  and \
                     self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] + 1] == 0:
+
                     self.moving_figure[0][0] -= 1
                     self.moving_figure[0][1] -= 1
                     self.moving_figure[2][0] += 1
@@ -361,53 +405,83 @@ class CellList:
 
         elif self.type_of_figure == 4:
             if self.moving_figure[3][1] == self.moving_figure[2][1]:
-                if self.result[self.moving_figure[3][0] + 2][self.moving_figure[3][1] + 2] == 0  and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] + 2 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                    self.result[self.moving_figure[3][0] + 2][self.moving_figure[3][1] + 2] == 0  and \
                     self.result[self.moving_figure[2][0] + 2][self.moving_figure[2][1]] == 0:
+
                     self.moving_figure[3][0] += 2
                     self.moving_figure[3][1] += 2
                     self.moving_figure[2][0] += 2
             elif self.moving_figure[0][0] == self.moving_figure[2][0] - 1:
-                if self.result[self.moving_figure[3][0]][self.moving_figure[3][1] - 3] == 0  and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                    self.result[self.moving_figure[3][0]][self.moving_figure[3][1] - 3] == 0  and \
                     self.result[self.moving_figure[0][0] + 2][self.moving_figure[0][1] - 1] == 0:
+
                     self.moving_figure[3][1] -= 3
                     self.moving_figure[0][0] += 2
                     self.moving_figure[0][1] -= 1
             elif self.moving_figure[2][1] == self.moving_figure[0][1]:
-                if self.result[self.moving_figure[2][0] - 2][self.moving_figure[2][1]] == 0  and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] - 2 < self.cols and \
+                    self.result[self.moving_figure[2][0] - 2][self.moving_figure[2][1]] == 0  and \
                     self.result[self.moving_figure[0][0] - 2][self.moving_figure[0][1] - 2] == 0:
+
                     self.moving_figure[2][0] -= 2
                     self.moving_figure[0][0] -= 2
                     self.moving_figure[0][1] -= 2
             elif self.moving_figure[2][0] < self.moving_figure[3][0]:
-                if self.result[self.moving_figure[0][0]][self.moving_figure[0][1] + 3] == 0  and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] + 1 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] + 3 < self.cols and \
+                    self.result[self.moving_figure[0][0]][self.moving_figure[0][1] + 3] == 0  and \
                     self.result[self.moving_figure[3][0] - 2][self.moving_figure[3][1] + 1] == 0:
+
                     self.moving_figure[0][1] += 3
                     self.moving_figure[3][0] -= 2
                     self.moving_figure[3][1] += 1
 
         elif  self.type_of_figure == 5:
             if self.moving_figure[0][1] == self.moving_figure[1][1]:
-                if self.result[self.moving_figure[0][0]][self.moving_figure[0][1] - 2] == 0  and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] - 1 < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] + 1 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] - 2 < self.cols and \
+                    self.result[self.moving_figure[0][0]][self.moving_figure[0][1] - 2] == 0  and \
                     self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1] - 1] == 0 and \
                     self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1] + 1] == 0:
+
                     self.moving_figure[0][1] -= 2
                     self.moving_figure[1][0] += 1
                     self.moving_figure[1][1] -= 1
                     self.moving_figure[3][0] += 1
                     self.moving_figure[3][1] += 1
             elif self.result[self.moving_figure[0][0]][self.moving_figure[0][1] + 2] == 0:
-                if self.result[self.moving_figure[1][0] - 1][self.moving_figure[1][1] + 1] == 0 and \
+                if self.moving_figure[1][1] >= 0 and self.moving_figure[1][1] + 1 < self.cols and \
+                                self.moving_figure[2][1] >= 0 and self.moving_figure[2][1] < self.cols and \
+                                self.moving_figure[3][1] >= 0 and self.moving_figure[3][1] - 1 < self.cols and \
+                                self.moving_figure[0][1] >= 0 and self.moving_figure[0][1] < self.cols and \
+                    self.result[self.moving_figure[1][0] - 1][self.moving_figure[1][1] + 1] == 0 and \
                     self.result[self.moving_figure[3][0] - 1][self.moving_figure[3][1] - 1] == 0:
+
                     self.moving_figure[0][1] += 2
                     self.moving_figure[1][0] -= 1
                     self.moving_figure[1][1] += 1
                     self.moving_figure[3][0] -= 1
                     self.moving_figure[3][1] -= 1
 
-        self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-        self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-        self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-        self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+        self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+        self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+        self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+        self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
 
     def move_right(self):
         self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 0
@@ -423,28 +497,28 @@ class CellList:
 
             if self.moving_figure[0][1] == self.cols or self.moving_figure[1][1] == self.cols or \
                             self.moving_figure[2][1] == self.cols or self.moving_figure[3][1] == self.cols  or \
-                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] == 1 or \
-                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] == 1 or \
-                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] == 1 or \
-                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] == 1:
+                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] != 0 or \
+                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] != 0 or \
+                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] != 0 or \
+                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] != 0:
                 self.moving_figure[0][1] -= 1
                 self.moving_figure[1][1] -= 1
                 self.moving_figure[2][1] -= 1
                 self.moving_figure[3][1] -= 1
-                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             else:
-                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
         else:
-            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             #self.moving_figure, self.type_of_figure = new_figure()
 
     def move_left(self):
@@ -460,37 +534,37 @@ class CellList:
             self.moving_figure[3][1] -= 1
             if self.moving_figure[0][1] == -1 or self.moving_figure[1][1] == -1 or \
                     self.moving_figure[2][1] == -1 or self.moving_figure[3][1] == -1 or \
-                    self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] == 1 or \
-                    self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] == 1 or \
-                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] == 1 or \
-                    self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] == 1:
+                    self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] != 0 or \
+                    self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] != 0 or \
+                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] != 0 or \
+                    self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] != 0:
                 self.moving_figure[0][1] += 1
                 self.moving_figure[1][1] += 1
                 self.moving_figure[2][1] += 1
                 self.moving_figure[3][1] += 1
-                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             else:
-                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+                self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+                self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+                self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+                self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
         else:
-            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = 1
-            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = 1
-            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = 1
-            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = 1
+            self.result[self.moving_figure[0][0]][self.moving_figure[0][1]] = self.type_of_figure
+            self.result[self.moving_figure[1][0]][self.moving_figure[1][1]] = self.type_of_figure
+            self.result[self.moving_figure[2][0]][self.moving_figure[2][1]] = self.type_of_figure
+            self.result[self.moving_figure[3][0]][self.moving_figure[3][1]] = self.type_of_figure
             #self.moving_figure, self.type_of_figure = new_figure()
 
     def on_bottom(self):
         if (self.moving_figure[0][0] == self.rows - 1 or self.moving_figure[1][0] == self.rows - 1 or self.moving_figure[2][
             0] == self.rows - 1 or self.moving_figure[3][0] == self.rows - 1 or \
-                        self.result[self.moving_figure[0][0] + 1][self.moving_figure[0][1]] == 1 or \
-                        self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1]] == 1 or \
-                        self.result[self.moving_figure[2][0] + 1][self.moving_figure[2][1]] == 1 or \
-                        self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1]] == 1):
+                        self.result[self.moving_figure[0][0] + 1][self.moving_figure[0][1]] != 0 or \
+                        self.result[self.moving_figure[1][0] + 1][self.moving_figure[1][1]] != 0 or \
+                        self.result[self.moving_figure[2][0] + 1][self.moving_figure[2][1]] != 0 or \
+                        self.result[self.moving_figure[3][0] + 1][self.moving_figure[3][1]] != 0):
             return True
         else:
             return False
@@ -499,7 +573,7 @@ class CellList:
         while self.move_figure():
             self.move_figure()
         self.end_came = not self.game_over()
-        self.moving_figure, self.type_of_figure = new_figure()
+        self.moving_figure, self.type_of_figure, self.color = new_figure()
 
     def delete_row(self):
         self.delta_speed = 0
@@ -513,7 +587,7 @@ class CellList:
                 self.sound_delete.play()
 
                 self.points += 1
-                self.delta_speed += 0.5
+                self.delta_speed += 0.2
                 row = i
                 while (row >= 0):
                     for n in range(self.cols):
@@ -524,7 +598,7 @@ class CellList:
     def game_over(self):
         clear = True
         for i in range(self.cols):
-            if self.result[0][i] == 1:
+            if self.result[0][i] != 0:
                 clear = False
         if not clear:
             self.sound_game.stop()
